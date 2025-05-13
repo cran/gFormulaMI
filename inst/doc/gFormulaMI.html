@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -348,7 +348,8 @@ via Multiple Imputation</h1>
 <p>In this vignette we introduce the functionality of the
 <code>gFormulaMI</code>. The package implements an approach to
 constructing a G-formula estimator using multiple imputation methods and
-software, as described by <a href="https://arxiv.org/abs/2301.12026">Bartlett et al (2023)</a>.</p>
+software, as described by <a href="https://doi.org/10.1177/09622802251316971">Bartlett et al
+(2025)</a>.</p>
 <p>First we use the simulated dataset provided in the package to
 demonstrate how to impute potential outcomes using
 <code>gFormulaImpute</code>. We then show how the resulting imputed
@@ -359,17 +360,17 @@ missing values to begin with (i.e. regular missing data).</p>
 <div id="imputing-using-gformulaimpute" class="section level1">
 <h1>Imputing using <code>gFormulaImpute</code></h1>
 <p>First, we load the package</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gFormulaMI)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(gFormulaMI)</span></code></pre></div>
 <p>The first few rows of the simulated dataset that ships with the
 package look like</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(simDataFullyObs)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           l0 a0          l1 a1         l2 a2          y</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 -0.6332580  1  0.59545963  1  2.7644551  1  3.4091077</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  0.1182498  0  0.62444135  0 -0.9677095  1 -0.8586307</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  0.4833364  1 -0.53836723  0 -0.7088896  0 -0.4378790</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  0.6775931  0  0.57759241  1  2.0477487  1  3.8760967</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  0.4278554  1  1.50188037  1  3.4155576  1  4.4027209</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  0.6437421  1 -0.01322485  1  2.2178911  1  4.1302417</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">head</span>(simDataFullyObs)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt;           l0 a0          l1 a1         l2 a2          y</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; 1 -0.6332580  1  0.59545963  1  2.7644551  1  3.4091077</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; 2  0.1182498  0  0.62444135  0 -0.9677095  1 -0.8586307</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; 3  0.4833364  1 -0.53836723  0 -0.7088896  0 -0.4378790</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; 4  0.6775931  0  0.57759241  1  2.0477487  1  3.8760967</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; 5  0.4278554  1  1.50188037  1  3.4155576  1  4.4027209</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 6  0.6437421  1 -0.01322485  1  2.2178911  1  4.1302417</span></span></code></pre></div>
 <p>Here the <code>l</code> variables correspond to a confounder measured
 at baseline (<code>l0</code>) and two follow-up time points
 (<code>l1</code> and <code>l2</code>). The time-varying binary treatment
@@ -384,24 +385,24 @@ requires) there to be no missing values in the data frame. To run, we
 have to tell <code>gFormulaImpute</code> which variables correspond to
 the time-varying treatment and the treatment regime(s) that we want it
 to create imputations for:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7626</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#impute synthetic datasets under two regimes of interest</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>imps <span class="ot">&lt;-</span> <span class="fu">gFormulaImpute</span>(<span class="at">data=</span>simDataFullyObs,<span class="at">M=</span><span class="dv">10</span>,<span class="at">trtVars=</span><span class="fu">c</span>(<span class="st">&quot;a0&quot;</span>,<span class="st">&quot;a1&quot;</span>,<span class="st">&quot;a2&quot;</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">trtRegimes=</span><span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Input data is a regular data frame.&quot;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Variables imputed using:&quot;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     l0     a0     l1     a1     l2     a2      y regime </span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; </span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Predictor matrix is set to:&quot;</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        l0 a0 l1 a1 l2 a2 y regime</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l0      0  0  0  0  0  0 0      0</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a0      1  0  0  0  0  0 0      0</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l1      1  1  0  0  0  0 0      0</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a1      1  1  1  0  0  0 0      0</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l2      1  1  1  1  0  0 0      0</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a2      1  1  1  1  1  0 0      0</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y       1  1  1  1  1  1 0      0</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; regime  1  1  1  1  1  1 1      0</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7626</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#impute synthetic datasets under two regimes of interest</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>imps <span class="ot">&lt;-</span> <span class="fu">gFormulaImpute</span>(<span class="at">data=</span>simDataFullyObs,<span class="at">M=</span><span class="dv">10</span>,<span class="at">trtVars=</span><span class="fu">c</span>(<span class="st">&quot;a0&quot;</span>,<span class="st">&quot;a1&quot;</span>,<span class="st">&quot;a2&quot;</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        <span class="at">trtRegimes=</span><span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)))</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Input data is a regular data frame.&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Variables imputed using:&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;     l0     a0     l1     a1     l2     a2      y regime </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; </span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Predictor matrix is set to:&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;        l0 a0 l1 a1 l2 a2 y regime</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; l0      0  0  0  0  0  0 0      0</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; a0      1  0  0  0  0  0 0      0</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; l1      1  1  0  0  0  0 0      0</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; a1      1  1  1  0  0  0 0      0</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; l2      1  1  1  1  0  0 0      0</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; a2      1  1  1  1  1  0 0      0</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; y       1  1  1  1  1  1 0      0</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; regime  1  1  1  1  1  1 1      0</span></span></code></pre></div>
 <p>Here we have called <code>gFormulaImpute</code> requesting 10
 imputations to be generated for two regimes of interest, corresponding
 to no treatment at each time point (0,0,0) and treatment at each time
@@ -476,14 +477,14 @@ datasets. That is, the imputed datasets created contain imputed
 treatment regimes specified. The original rows in the data frame passed
 to <code>gFormulaImpute</code> do not appear in the imputed datasets
 returned to us. The first few rows of the first imputed dataset are:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mice<span class="sc">::</span><span class="fu">complete</span>(imps))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           l0 a0         l1 a1            l2 a2          y regime</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  0.6177218  0  0.6397720  0 -0.0003761256  0  0.5996190      1</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  0.2044563  0 -0.6073790  0 -1.7856679957  0 -1.7246571      1</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  0.4327859  0 -0.3925652  0 -0.7555212806  0 -1.5840459      1</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  0.6059553  0  2.4764117  0  0.7312018102  0  0.6342567      1</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  0.2985589  0  0.9223022  0  0.0734605439  0 -1.1511625      1</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 -0.1763264  0  0.6122369  0  0.8838681514  0  2.0858243      1</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">head</span>(mice<span class="sc">::</span><span class="fu">complete</span>(imps))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt;           l0 a0         l1 a1            l2 a2          y regime</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; 1  0.6177218  0  0.6397720  0 -0.0003761256  0  0.5996190      1</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; 2  0.2044563  0 -0.6073790  0 -1.7856679957  0 -1.7246571      1</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 3  0.4327859  0 -0.3925652  0 -0.7555212806  0 -1.5840459      1</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 4  0.6059553  0  2.4764117  0  0.7312018102  0  0.6342567      1</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 5  0.2985589  0  0.9223022  0  0.0734605439  0 -1.1511625      1</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 6 -0.1763264  0  0.6122369  0  0.8838681514  0  2.0858243      1</span></span></code></pre></div>
 <p>We see that in the first rows of the first imputed dataset,
 <code>a0</code>, <code>a1</code> and <code>a2</code> are always zero,
 because the first treatment regime we specified to impute for was
@@ -496,7 +497,7 @@ the imputed longitudinal histories. Here we will simply compare the mean
 of the final outcome variable <code>y</code> between the two regimes we
 have imputed for. To do this, we fit a linear model with <code>y</code>
 as the dependent variable and <code>regime</code> as covariate:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fits <span class="ot">&lt;-</span> <span class="fu">with</span>(imps, <span class="fu">lm</span>(y<span class="sc">~</span><span class="fu">factor</span>(regime)))</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>fits <span class="ot">&lt;-</span> <span class="fu">with</span>(imps, <span class="fu">lm</span>(y<span class="sc">~</span><span class="fu">factor</span>(regime)))</span></code></pre></div>
 <p>Because the imputed datasets we have analysed are fully synthetic, we
 cannot (or rather should not) pool our estimates using Rubin’s standard
 combination rules (e.g. as implemented in <code>pool</code> in the
@@ -504,13 +505,13 @@ combination rules (e.g. as implemented in <code>pool</code> in the
 larger than they should be. Instead we use the synthetic imputation
 combination rules developed by Raghunathan et al (2003), implemented in
 the <code>syntheticPool</code> function:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">syntheticPool</span>(fits)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    Estimate       Within     Between       Total       df</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)     -0.02071539 0.0008125695 0.001763004 0.001126735 3.038045</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; factor(regime)2  2.96593502 0.0016251389 0.004203106 0.002998278 3.784951</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   95% CI L   95% CI U            p</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)     -0.1267874 0.08535658 5.803156e-01</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; factor(regime)2  2.8104386 3.12143146 1.304839e-06</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">syntheticPool</span>(fits)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt;                    Estimate       Within     Between       Total       df</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; (Intercept)     -0.02071539 0.0008125695 0.001763004 0.001126735 3.038045</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; factor(regime)2  2.96593502 0.0016251389 0.004203106 0.002998278 3.784951</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;                   95% CI L   95% CI U            p</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; (Intercept)     -0.1267874 0.08535658 5.803156e-01</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; factor(regime)2  2.8104386 3.12143146 1.304839e-06</span></span></code></pre></div>
 <p>Here the intercept corresponds to the mean of <code>y</code> under
 our first regime (0,0,0). The <code>factor(regime)2</code> coefficient
 corresponds to difference in the mean of <code>y</code> between the
@@ -533,21 +534,21 @@ Having imputed these, we can then pass the imputed datasets to
 step.</p>
 <p>To illustrate these steps, let’s now create a new dataset from the
 simulated one, making some values missing:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>simDataMissing <span class="ot">&lt;-</span> simDataFullyObs</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l0[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l1[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l2[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>simDataMissing<span class="sc">$</span>y[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>simDataMissing <span class="ot">&lt;-</span> simDataFullyObs</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l0[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l1[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>simDataMissing<span class="sc">$</span>l2[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>simDataMissing<span class="sc">$</span>y[<span class="fu">runif</span>(<span class="fu">nrow</span>(simDataMissing))<span class="sc">&lt;</span><span class="fl">0.2</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
 <p>Here we have simply made around 20% of values missing in
 <code>l0</code>, <code>l1</code>, <code>l2</code> and <code>y</code>,
 completely randomly.</p>
 <p>Next, we impute the <code>simDataMissing</code> data frame using the
 <code>mice</code> function:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>simDataMissingImps <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(simDataMissing,<span class="at">m=</span><span class="dv">10</span>,<span class="at">printFlag=</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>simDataMissingImps <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(simDataMissing,<span class="at">m=</span><span class="dv">10</span>,<span class="at">printFlag=</span><span class="cn">FALSE</span>)</span></code></pre></div>
 <p>In a real substantive analysis we should take more care to think
 about how we specify the imputation models. For more discussion of this
-point, see <a href="https://arxiv.org/abs/2301.12026">Bartlett et al
-(2023)</a>. In particular, note that the default behaviour of the
+point, see <a href="https://doi.org/10.1177/09622802251316971">Bartlett
+et al (2025)</a>. In particular, note that the default behaviour of the
 <code>mice</code> function is to impute numeric variables using the
 predictive mean matching method, rather than normal linear regression
 (as in the <code>gFormulaImpute</code> function).</p>
@@ -555,24 +556,24 @@ predictive mean matching method, rather than normal linear regression
 <code>gFormulaImpute</code> to create the synthetic imputations as
 before, but this time let’s try and generate 20 synthetic imputated
 datasets:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>imps2 <span class="ot">&lt;-</span> <span class="fu">gFormulaImpute</span>(<span class="at">data=</span>simDataMissingImps,<span class="at">M=</span><span class="dv">20</span>,<span class="at">trtVars=</span><span class="fu">c</span>(<span class="st">&quot;a0&quot;</span>,<span class="st">&quot;a1&quot;</span>,<span class="st">&quot;a2&quot;</span>),</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">trtRegimes=</span><span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Input data is a mice created multiple imputation object.&quot;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Value passed to M being ignored.&quot;</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Number of synthetic imputations to be generated set to 10 as in mids object passed to gFormulaImpute.&quot;</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Variables imputed using:&quot;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     l0     a0     l1     a1     l2     a2      y regime </span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; </span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Predictor matrix is set to:&quot;</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        l0 a0 l1 a1 l2 a2 y regime</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l0      0  0  0  0  0  0 0      0</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a0      1  0  0  0  0  0 0      0</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l1      1  1  0  0  0  0 0      0</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a1      1  1  1  0  0  0 0      0</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; l2      1  1  1  1  0  0 0      0</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a2      1  1  1  1  1  0 0      0</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y       1  1  1  1  1  1 0      0</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; regime  1  1  1  1  1  1 1      0</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>imps2 <span class="ot">&lt;-</span> <span class="fu">gFormulaImpute</span>(<span class="at">data=</span>simDataMissingImps,<span class="at">M=</span><span class="dv">20</span>,<span class="at">trtVars=</span><span class="fu">c</span>(<span class="st">&quot;a0&quot;</span>,<span class="st">&quot;a1&quot;</span>,<span class="st">&quot;a2&quot;</span>),</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                        <span class="at">trtRegimes=</span><span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)))</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Input data is a mice created multiple imputation object.&quot;</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Value passed to M being ignored.&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Number of synthetic imputations to be generated set to 10 as in mids object passed to gFormulaImpute.&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Variables imputed using:&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt;     l0     a0     l1     a1     l2     a2      y regime </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; &quot;norm&quot;     &quot;&quot; </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Predictor matrix is set to:&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;        l0 a0 l1 a1 l2 a2 y regime</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; l0      0  0  0  0  0  0 0      0</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; a0      1  0  0  0  0  0 0      0</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; l1      1  1  0  0  0  0 0      0</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; a1      1  1  1  0  0  0 0      0</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; l2      1  1  1  1  0  0 0      0</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; a2      1  1  1  1  1  0 0      0</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; y       1  1  1  1  1  1 0      0</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; regime  1  1  1  1  1  1 1      0</span></span></code></pre></div>
 <p>The output looks much the same as the first time we called
 <code>gFormulaImpute</code>, apart from the first few lines of output.
 <code>gFormulaImpute</code> can see that there are only 10 imputations
@@ -584,11 +585,13 @@ object thus contains 10 imputations, which can be analysed using
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
-<p>Bartlett JW, Olarte Parra C, Daniel RM. G-formula for causal
-inference via multiple imputation. 2023 <a href="https://arxiv.org/abs/2301.12026">arXiv 2301.12026</a></p>
-<p>Raghunathan TE, Reiter JP, Rubin DB. 2003. Multiple imputation for
-statistical disclosure limitation. Journal of Official Statistics,
-19(1), p.1-16.</p>
+<p>Bartlett, J.W., Olarte Parra, C., Granger, E., Keogh, R.H., van Zwet,
+E.W. and Daniel, R.M., 2025. G-formula with multiple imputation for
+causal inference with incomplete data. Statistical Methods in Medical
+Research.</p>
+<p>Raghunathan, T. E., Reiter, J. P., &amp; Rubin, D. B. (2003).
+Multiple imputation for statistical disclosure limitation. Journal of
+Official Statistics, 19(1), 1.</p>
 </div>
 
 

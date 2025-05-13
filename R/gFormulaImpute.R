@@ -4,8 +4,8 @@
 #' specified treatment regimes of interest, based on the G-formula.
 #'
 #' `gFormulaImpute` creates multiple imputed synthetic datasets of longitudinal histories under
-#' specified treatment regimes of interest, based on the G-formula, as described in
-#' \href{https://arxiv.org/abs/2301.12026}{Bartlett et al 2023}. Specifically, to
+#' specified treatment regimes of interest, based on the G-formula, as described by Bartlett et al (2025)
+#' \doi{10.1177/09622802251316971}. Specifically, to
 #' the observed data frame, an additional `nSim` rows are added in which all variables are set to
 #' missing, except the time-varying treatment variables. The latter are set to the values
 #' as specified in the `trtRegimes` argument. If multiple treatment regimes are specified,
@@ -51,13 +51,16 @@
 #' @param predictorMatrix An optional predictor matrix to specify which variables to use
 #' as predictors in the imputation models. The default is to impute sequentially, i.e. impute
 #' using all variables to the left of the variable being imputed as covariates
+#' @param missingDataCheck TRUE/FALSE indicating whether `gFormulaMI` checks, when
+#' passed a regular data frame, whether there any missing values.
 #'
 #' @returns an S3 object of class mids (multiply imputed dataset)
 #'
 #' @author Jonathan Bartlett \email{jonathan.bartlett1@@lshtm.ac.uk}
 #'
-#' @references Bartlett JW, Olarte Parra C, Daniel RM. G-formula for causal inference
-#' via multiple imputation. 2023 \url{https://arxiv.org/abs/2301.12026}
+#' @references Bartlett JW, Olarte Parra C, Granger E, Keogh RH., van Zwet EW
+#' and Daniel RM, 2025. G-formula with multiple imputation for causal inference
+#' with incomplete data. Statistical Methods in Medical Research.
 #'
 #' Raghunathan TE, Reiter JP, Rubin DB. 2003. Multiple imputation for statistical
 #'  disclosure limitation. Journal of Official Statistics, 19(1), p.1-16.
@@ -78,7 +81,8 @@
 #'
 gFormulaImpute <- function(data, M=50, trtVars, trtRegimes,
                            nSim=NULL, micePrintFlag=FALSE,silent=FALSE,
-                           method=NULL,predictorMatrix=NULL) {
+                           method=NULL,predictorMatrix=NULL,
+                           missingDataCheck=TRUE) {
 
   if (inherits(data, "mids")) {
     missingData <- TRUE
@@ -98,9 +102,11 @@ gFormulaImpute <- function(data, M=50, trtVars, trtRegimes,
     if (silent==FALSE) {
       print("Input data is a regular data frame.")
     }
-    #check there are no missing values
-    if (sum(is.na(data))>0) {
-      stop("Missing values detected - please multiply impute these and pass a mids type object as input.")
+    #check there are no missing values, unless user has turned off this check
+    if (missingDataCheck==TRUE) {
+      if (sum(is.na(data))>0) {
+        stop("Missing values detected - please multiply impute these and pass a mids type object as input.")
+      }
     }
   } else {
     stop("Input dataset should either be a data frame or a mids object created by mice.")
